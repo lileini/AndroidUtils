@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -196,10 +197,29 @@ public class LogUtil {
      * 删除指定的日志文件
      */
     public static void delFile() {// 删除日志文件
-        String needDelFiel = FILE_SUFFIX.format(getDateBefore());
-        File file = new File(LOG_FILE_PATH, needDelFiel + LOG_FILE_NAME);
-        if (file.exists()) {
-            file.delete();
+        File dirFile = new File(LOG_FILE_PATH);
+        if (!dirFile.exists()){
+            return;
+        }
+        ArrayList<String> notNeedDealFileNames = new ArrayList<>(LOG_SAVE_DAYS);
+        Date nowtime = new Date();
+        Calendar now = Calendar.getInstance();
+        for (int i = 0; i < LOG_SAVE_DAYS; i++) {
+            now.setTime(nowtime);
+            now.set(Calendar.DATE, now.get(Calendar.DATE) - i);
+
+            String name = FILE_SUFFIX.format(now.getTime());
+            File notNeedDealFile = new File(LOG_FILE_PATH,  LOG_FILE_NAME +name+".log" );
+            notNeedDealFileNames.add(notNeedDealFile.getName());
+        }
+        if (dirFile.listFiles() == null)
+            return;
+        for (File file : dirFile.listFiles()) {
+            if (!notNeedDealFileNames.contains(file.getName())){
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
         }
     }
 
